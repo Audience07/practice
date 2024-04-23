@@ -9,6 +9,7 @@ void _VirtualAlloc(size_t SizeofImage);
 void _ReadFileSign();
 void _WriteData();
 void _ReadSectionTable(size_t NumberOfSection);
+void __call();
 
 //全局变量
 long long filesize = 0;
@@ -55,7 +56,8 @@ int main()
 	_ReadSectionTable(NumberOfSection);
 	_VirtualAlloc(SizeOfImage);
 	_WriteData();
-	printf("%x", SectionTable.VirtualAddress[0]);
+	printf("%x", SizeOfImage);
+	__call();
 
 }
 
@@ -84,6 +86,7 @@ void _FileBuffer(char* str)
 		fclose(pFile);
 		return;
 	}
+
 
 	//将文件读入缓冲区并关闭文件句柄
 	fread(FileBuffer, 1, filesize, pFile);
@@ -117,6 +120,8 @@ void _ReadFileSign() {
 	SizeOfHeader = *(DWORD*)(FileBuffer + NTHeader + 0x54);
 
 
+
+
 	
 }
 
@@ -126,10 +131,9 @@ void _ReadSectionTable(size_t NumberOfSection) {
 	int i = 0;
 	
 	for (i = 0; i < NumberOfSection; i++) {
-		SectionTable.SizeOfRawData[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0x10 + (0x28 * i));
 		SectionTable.VirtualAddress[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0xc + (0x28 * i));
 		SectionTable.SizeOfRawData[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0x10 + (0x28*i));
-		SectionTable.VirtualAddress[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0xc + (0x28*i));
+		SectionTable.PointerOfRawData[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0x14 + (0x28 * i));
 	}
 
 
@@ -154,33 +158,23 @@ void _VirtualAlloc(size_t SizeofImage) {
 //将FileHeader写入vFileBuffer,因为不管是在文件还是在内存，它们的大小都是一样的
 void _WriteData() {
 	memcpy(vFileBuffer, FileBuffer, SizeOfHeader);
+
+	//拷贝块
+	for (int i = 0; i < NumberOfSection; i++) {
+		memcpy((char*)vFileBuffer+SectionTable.VirtualAddress[i], FileBuffer + SectionTable.PointerOfRawData[i], SectionTable.SizeOfRawData[i]);
+	}
+	free(FileBuffer);
+
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 //跳转至代码块执行
-/*
-void _call() {
+
+void __call() {
+	DWORD PointofCode = (char*)vFileBuffer + AddressOfEntryPoint;
 	__asm {
 		mov eax, PointofCode;
 		call eax;
 	}
 }
-*/
-
-
-
-
-
