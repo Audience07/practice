@@ -3,28 +3,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
-//º¯ÊıÉùÃ÷
+//å‡½æ•°å£°æ˜
 void _FileBuffer(char* str);
 void _VirtualAlloc(size_t SizeofImage);
 void _ReadFileSign();
 void _WriteData();
 void _ReadSectionTable(size_t NumberOfSection);
 
-//È«¾Ö±äÁ¿
+//å…¨å±€å˜é‡
 long long filesize = 0;
 char*  FileBuffer = NULL;
 LPVOID vFileBuffer = NULL;
 
-//´Ó»º³åÇø¶ÁÈ¡³öÀ´µÄÖµ
+//ä»ç¼“å†²åŒºè¯»å–å‡ºæ¥çš„å€¼
 DWORD NTHeader;
 DWORD OPointOfSectionTable;
 
-//PEÍ·
+//PEå¤´
 WORD Machine;
 WORD NumberOfSection;
 WORD SizeOfOptionHeader;
 
-//¿ÉÑ¡PEÍ·
+//å¯é€‰PEå¤´
 WORD Magic;					//10B x86	20B x86_64
 DWORD AddressOfEntryPoint;
 DWORD ImageBase;
@@ -47,7 +47,7 @@ struct {
 
 
 
-//mainº¯Êı¸ºÔğµ÷ÓÃ
+//mainå‡½æ•°è´Ÿè´£è°ƒç”¨
 int main()
 {
 	_FileBuffer("E:/SpaceSniffer.exe");
@@ -60,32 +60,32 @@ int main()
 }
 
 
-//ÎªÎÄ¼ş·ÖÅäÄÚ´æ£¬½«Ö¸Õë·µ»Ø¸øFileBuffer
+//ä¸ºæ–‡ä»¶åˆ†é…å†…å­˜ï¼Œå°†æŒ‡é’ˆè¿”å›ç»™FileBuffer
 void _FileBuffer(char* str)
 {
-	//´ò¿ªÎÄ¼ş
+	//æ‰“å¼€æ–‡ä»¶
 	char a;
 	FILE* pFile;
 	pFile = fopen(str, "rb");
 	if (!pFile) {
-		perror("´ò¿ªÎÄ¼şÊ§°Ü");
+		perror("æ‰“å¼€æ–‡ä»¶å¤±è´¥");
 		return;
 	}
 
-	//»ñÈ¡ÎÄ¼ş´óĞ¡
+	//è·å–æ–‡ä»¶å¤§å°
 	fseek(pFile, 0, SEEK_END);
 	filesize = ftell(pFile);
 	fseek(pFile, 0, SEEK_SET);
 
-	//·ÖÅä»º³åÇø
+	//åˆ†é…ç¼“å†²åŒº
 	FileBuffer = (char*)malloc(filesize);
 	if (!FileBuffer) {
-		perror("·ÖÅäÄÚ´æÊ§°Ü");
+		perror("åˆ†é…å†…å­˜å¤±è´¥");
 		fclose(pFile);
 		return;
 	}
 
-	//½«ÎÄ¼ş¶ÁÈë»º³åÇø²¢¹Ø±ÕÎÄ¼ş¾ä±ú
+	//å°†æ–‡ä»¶è¯»å…¥ç¼“å†²åŒºå¹¶å…³é—­æ–‡ä»¶å¥æŸ„
 	fread(FileBuffer, 1, filesize, pFile);
 	fclose(pFile);
 }
@@ -93,10 +93,10 @@ void _FileBuffer(char* str)
 
 
 
-//¶ÁÈ¡PEÎÄ¼ş±ê¼Ç
+//è¯»å–PEæ–‡ä»¶æ ‡è®°
 void _ReadFileSign() {
-	//½«peÍ·Ğ´ÈëÄÚ´æ
-	//±ê¼ÇÎ»ÖÃ
+	//å°†peå¤´å†™å…¥å†…å­˜
+	//æ ‡è®°ä½ç½®
 	NTHeader = *(DWORD*)(FileBuffer + 0x3c);
 	
 
@@ -121,13 +121,13 @@ void _ReadFileSign() {
 }
 
 
-//Ñ­»·¶ÁÈ¡½Ú±íÖĞµÄÊı¾İ
+//å¾ªç¯è¯»å–èŠ‚è¡¨ä¸­çš„æ•°æ®
 void _ReadSectionTable(size_t NumberOfSection) {
 	int i = 0;
 	
 	for (i = 0; i < NumberOfSection; i++) {
-		SectionTable.SizeOfRawData[0] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0x10 + (0x28 * i));
-		SectionTable.VirtualAddress[0] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0xc + (0x28 * i));
+		SectionTable.SizeOfRawData[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0x10 + (0x28 * i));
+		SectionTable.VirtualAddress[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0xc + (0x28 * i));
 		SectionTable.SizeOfRawData[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0x10 + (0x28*i));
 		SectionTable.VirtualAddress[i] = *(DWORD*)(FileBuffer + OPointOfSectionTable + 0xc + (0x28*i));
 	}
@@ -138,20 +138,20 @@ void _ReadSectionTable(size_t NumberOfSection) {
 
 
 
-//ÏñÏµÍ³ÉêÇëÄÚ´æ
-//ÉêÇë³É¹¦ºó£¬½«ÉêÇëµÄÄÚ´æÍ·²¿·ÅÔÚvFileBuffer
+//åƒç³»ç»Ÿç”³è¯·å†…å­˜
+//ç”³è¯·æˆåŠŸåï¼Œå°†ç”³è¯·çš„å†…å­˜å¤´éƒ¨æ”¾åœ¨vFileBuffer
 void _VirtualAlloc(size_t SizeofImage) {
-	//malloc·ÖÅäµÄÄÚ´æÃ»ÓĞÖ´ĞĞµÄÊôĞÔ£¬Òò´Ë²»ÄÜÖ´ĞĞ
-	//Ïñ²Ù×÷ÏµÍ³ÉêÇë¿É¶Á¿ÉĞ´ÄÚ´æ,¿½±´headerÍ·
+	//mallocåˆ†é…çš„å†…å­˜æ²¡æœ‰æ‰§è¡Œçš„å±æ€§ï¼Œå› æ­¤ä¸èƒ½æ‰§è¡Œ
+	//åƒæ“ä½œç³»ç»Ÿç”³è¯·å¯è¯»å¯å†™å†…å­˜,æ‹·è´headerå¤´
 	vFileBuffer = VirtualAlloc(NULL, SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	if (!vFileBuffer) {
-		printf("ÉêÇëÄÚ´æÊ§°Ü");
+		printf("ç”³è¯·å†…å­˜å¤±è´¥");
 		return;
 	}
 }
 
 
-//½«FileHeaderĞ´ÈëvFileBuffer,ÒòÎª²»¹ÜÊÇÔÚÎÄ¼ş»¹ÊÇÔÚÄÚ´æ£¬ËüÃÇµÄ´óĞ¡¶¼ÊÇÒ»ÑùµÄ
+//å°†FileHeaderå†™å…¥vFileBuffer,å› ä¸ºä¸ç®¡æ˜¯åœ¨æ–‡ä»¶è¿˜æ˜¯åœ¨å†…å­˜ï¼Œå®ƒä»¬çš„å¤§å°éƒ½æ˜¯ä¸€æ ·çš„
 void _WriteData() {
 	memcpy(vFileBuffer, FileBuffer, SizeOfHeader);
 }
@@ -170,7 +170,7 @@ void _WriteData() {
 
 
 
-//Ìø×ªÖÁ´úÂë¿éÖ´ĞĞ
+//è·³è½¬è‡³ä»£ç å—æ‰§è¡Œ
 /*
 void _call() {
 	__asm {
